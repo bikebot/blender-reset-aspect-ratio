@@ -2,7 +2,7 @@ bl_info = {
     "name": "Reset Aspect Ratio",
     "author": "Bikebot",
     "version": (1, 0, 3),
-    "blender": (2, 78, 0),
+    "blender": (2, 80, 0),
     "location": "Sequencer > Reset Aspect Ratio",
     "description": "Correct aspect ratio of image and video strips",
     "warning": "",
@@ -10,8 +10,9 @@ bl_info = {
 }
 
 import bpy
+from bpy.utils import unregister_class
 
-class ResetAspectRatio(bpy.types.Operator):
+class SEQUENCER_OT_reset_aspect_ratio(bpy.types.Operator):
     """Correct aspect ratio of image and video strips"""
     bl_idname = "scene.reset_aspect_ratio"
     bl_label = "Reset Aspect Ratio"
@@ -53,7 +54,7 @@ class ResetAspectRatio(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def FitPanel(self, context):
+def SEQUENCER_PT_fit_panel(self, context):
     layout = self.layout
     obj = context.selected_editable_sequences[0]
     layout.prop(obj, "fitScale")
@@ -63,15 +64,17 @@ def FitPanel(self, context):
 def register():
     bpy.types.TransformSequence.fitScale = bpy.props.FloatProperty(
         name="Fit Scale", description="Uniform scale of fitted image", default=100, 
-        min=0.0, soft_max=1000, subtype="PERCENTAGE", update=ResetAspectRatio.execute)
-    bpy.utils.register_class(ResetAspectRatio)
-    bpy.types.SEQUENCER_PT_effect.append(FitPanel)
+        min=0.0, soft_max=1000, subtype="PERCENTAGE", update=SEQUENCER_OT_reset_aspect_ratio.execute)
+    bpy.utils.register_class(SEQUENCER_OT_reset_aspect_ratio)
+    bpy.types.SEQUENCER_PT_effect.append(SEQUENCER_PT_fit_panel)
 
-# Unregister doesn't seem to work properly
 def unregister():
+    bpy.utils.unregister_class(SEQUENCER_OT_reset_aspect_ratio)
+    bpy.types.SEQUENCER_PT_effect.remove(SEQUENCER_PT_fit_panel)
     del bpy.types.TransformSequence.fitScale
-    bpy.types.SEQUENCER_PT_effect.remove(FitPanel)
-    bpy.utils.unregister_class(FitImage)
+
 
 if __name__ == "__main__":
     register()
+    #unregister()
+
